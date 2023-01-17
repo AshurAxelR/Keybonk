@@ -1,0 +1,20 @@
+.keybonk-key {
+	float: left;
+	box-sizing: border-box;
+	text-align: center;
+	cursor: pointer;
+	
+	height: 35px;
+	line-height: 35px;
+	font-size: 15px;
+
+	color: #eee;
+	background: #000;
+	
+	border: 1px solid #777;
+	border-radius: 5px;
+	box-shadow: 0px 2px 4px #444;
+}
+.keybonk-key-active {
+	background: #444;
+}

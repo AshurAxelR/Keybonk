@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Keybonk example</title>
+
+<script src="keybonk.js"></script>
+<link rel="stylesheet" href="keybonk_light.css">
+
+<script>
+
+var keybonk;
+
+function switchTarget(e) {
+	if(keybonk!=undefined)
+		keybonk.switchTarget(e);
+}
+
+function init() {
+	keybonk = new Keybonk('keybonk');
+	switchTarget(document.activeElement);
+}
+
+</script>
+
+<style>
+body {
+	font-family: sans-serif;
+	background-color: #fafafa;
+	color: #555;
+	margin: 0;
+}
+div.center {
+	position: absolute;
+	width: 540px;
+	left: 50%;
+	margin-left: -270px;
+}
+textarea {
+	font: inherit;
+	padding: 10px;
+	width: 100%;
+	height: 200px;
+	margin-top: 10px;
+	background-color: #fff;
+	color: #000;
+	border-radius: 5px;
+	border: 1px solid #aaa;
+	box-shadow: inset 0px 1px 3px #ccc;
+	outline: none;
+	resize: vertical;
+	box-sizing: border-box;
+}
+textarea.keybonk-target {
+	border: 1px solid #09f;
+}
+textarea::placeholder {
+	color: #aaa;
+}
+div#keybonk {
+	bottom: 10px;
+}
+</style>
+
+</head>
+<body onload="init()">
+<div class="center">
+<textarea id="kbtarget" autofocus onfocus="switchTarget(this)" placeholder="Type here..."></textarea>
+<textarea id="alttarget" onfocus="switchTarget(this)" placeholder="... or here."></textarea>
+</div>
+
+<div id="keybonk" class="center"></div>
+</body>
