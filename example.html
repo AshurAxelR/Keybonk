@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <title>Keybonk example</title>
 
+<script src="words.js"></script>
 <script src="keybonk.js"></script>
 <link rel="stylesheet" href="keybonk_light.css">
 
@@ -12,13 +13,19 @@
 var keybonk;
 
 function switchTarget(e) {
-	if(keybonk!=undefined)
+	if(keybonk!==undefined)
 		keybonk.switchTarget(e);
+}
+
+function updateSuggestions() {
+	if(keybonk!==undefined)
+		keybonk.updateWordSuggestions();
 }
 
 function init() {
 	keybonk = new Keybonk('keybonk');
 	switchTarget(document.activeElement);
+	document.addEventListener('selectionchange', updateSuggestions);
 }
 
 </script>
@@ -46,7 +53,7 @@ textarea {
 	color: #000;
 	border-radius: 5px;
 	border: 1px solid #aaa;
-	box-shadow: inset 0px 1px 3px #ccc;
+	box-shadow: inset 0 1px 3px #ccc;
 	outline: none;
 	resize: vertical;
 	box-sizing: border-box;
@@ -57,17 +64,14 @@ textarea.keybonk-target {
 textarea::placeholder {
 	color: #aaa;
 }
-div#keybonk {
-	bottom: 10px;
-}
 </style>
 
 </head>
 <body onload="init()">
 <div class="center">
-<textarea id="kbtarget" autofocus onfocus="switchTarget(this)" placeholder="Type here..."></textarea>
-<textarea id="alttarget" onfocus="switchTarget(this)" placeholder="... or here."></textarea>
+<textarea id="kbtarget" autofocus onfocus="switchTarget(this)" oninput="updateSuggestions()" placeholder="Type here..."></textarea>
+<textarea id="alttarget" onfocus="switchTarget(this)" oninput="updateSuggestions()" placeholder="... or here."></textarea>
 </div>
 
-<div id="keybonk" class="center"></div>
+<div id="keybonk" class="keybonk"></div>
 </body>
