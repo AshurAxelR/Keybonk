@@ -15,15 +15,22 @@ class Keybonk {
 		const word = this.target.value.slice(0, start).split(/\s+/).pop();
 		if(word.length>0) {
 			const kb = this;
-			const suggestions = wordFreqDB[word.toLowerCase()];
+			const lword = word.toLowerCase();
+			const key = lword.substring(0, 6); // use MAX_KEY from proc_words.py
+			const suggestions = wordFreqDB[key];
 			if(suggestions!==undefined) {
 				for(let i=0; i<suggestions.length; i++) {
 					let key = document.createElement('div');
 					key.classList.add('keybonk-suggest-item');
-					key.innerHTML = word+suggestions[i].slice(word.length);
+					const sug = suggestions[i];
+					if(!sug.toLowerCase().startsWith(lword))
+						continue;
+						
+					const sugEnd = sug.slice(word.length);
+					key.innerHTML = word+sugEnd;
 					
 					key.addEventListener('click', function() {
-						kb.typeCharacter(suggestions[i].slice(word.length)+' ');
+						kb.typeCharacter(sugEnd+' ');
 					});
 					
 					this.suggest.appendChild(key);
