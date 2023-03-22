@@ -44,6 +44,8 @@ class Keybonk {
 			this.target.classList.remove('keybonk-target');
 		this.target = e;
 		this.target.classList.add('keybonk-target');
+		if(this.target.value=='')
+			if(this.onEmpty) this.onEmpty();
 		this.updateWordSuggestions();
 	}
 
@@ -56,6 +58,14 @@ class Keybonk {
 		}
 	}
 	
+	onEmpty() {
+		this.changeMode('shift');
+	}
+	
+	onEnter() {
+		kb.typeCharacter('\n');
+	}
+
 	trimSpace() {
 		if(this.target==undefined || this.target==null)
 			return;
@@ -115,7 +125,7 @@ class Keybonk {
 		else
 			key.classList.remove('keybonk-key-active');
 	}
-
+	
 	constructor(parentDiv, target, keyWidth=50, keyMargin=2) {
 		if(parentDiv==undefined)
 			parentDiv = 'keybonk';
@@ -177,7 +187,7 @@ class Keybonk {
 					key.addEventListener('click', function() {
 						kb.typeBackspace(target);
 						if(kb.target.value=='')
-							kb.changeMode('shift');
+							if(kb.onEmpty) kb.onEmpty();
 					});
 				}
 				
@@ -209,7 +219,7 @@ class Keybonk {
 					key.innerHTML = '&#x21B2;';
 					key.style.width = (keyWidth+keyWidth/2)+'px';
 					key.addEventListener('click', function() {
-						kb.typeCharacter('\n');
+						if(kb.onEnter) kb.onEnter();
 					});
 				}
 				
@@ -264,7 +274,7 @@ class Keybonk {
 			br.style.clear = 'both';
 			parentDiv.appendChild(br);
 		}
-		kb.changeMode('shift');
+		kb.changeMode('default');
 	}
 	
 }
