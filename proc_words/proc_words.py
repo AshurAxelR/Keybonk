@@ -7,26 +7,16 @@ from collections import OrderedDict
 NUM_SUGGESTIONS = 5
 MAX_COUNT = 100000
 MAX_KEY = 6
+MAX_LENGTH = 8
 IDX_WORD = 1
 IDX_CAP = -1
 START = '100106029' # 'rank'
-
-def insert_word(wmap, word):
-    m = min(len(word), MAX_KEY)+1
-    for n in range(1, m):
-        key = word[:n].lower()
-        if ' ' in key:
-            break
-        if key not in wmap:
-            wmap[key] = [word]
-        elif len(wmap[key])<NUM_SUGGESTIONS and word not in wmap[key]:
-            wmap[key].append(word)
 
 def includes(words, word, warn=False):
     if not warn:
         return word in words
     else:
-        sus = False;
+        sus = False
         for w in words:
             if word==w:
                 return True
@@ -36,19 +26,18 @@ def includes(words, word, warn=False):
             print(f'warning: allowed {word}. Is it {sus}?')
         return False
 
-def proc_words(path, bad_path=None):
-    wmap = OrderedDict()
+def load_bads(path):
+    bads = set()
+    with io.open(path, 'rt') as f:
+        for line in f:
+            line = line.strip().lower()
+            if line:
+                bads.add(line)
+                bads.add(line + 's')
+                bads.add(line + 'y')
+    return bads
 
-    bads = []
-    if bad_path:
-        with io.open(bad_path, 'rt') as f:
-            for line in f:
-                line = line.strip().lower()
-                if line:
-                    bads.append(line)
-                    bads.append(line+'s')
-                    bads.append(line+'y')
-
+def proc_words_func(path, bads, max_count, func):
     with io.open(path, 'rt', errors='replace') as f:
         started = False
         count = 0
@@ -66,12 +55,44 @@ def proc_words(path, bad_path=None):
                 word = word.replace('_', ' ')
                 if IDX_CAP>=0 and float(vs[IDX_CAP]) > 0.7:
                     word = word.title()
-                insert_word(wmap, word)
-                count += 1
-                if count > MAX_COUNT:
-                    break
+                if func(word):
+                    count += 1
+                    if count > max_count:
+                        return
 
+def type_suggestion_dict(path, bads=set()):
+    wmap = OrderedDict()
+
+    def insert_word(word):
+        m = min(len(word), MAX_KEY) + 1
+        for n in range(1, m):
+            key = word[:n].lower()
+            if ' ' in key:
+                break
+            if key not in wmap:
+                wmap[key] = [word]
+            elif len(wmap[key]) < NUM_SUGGESTIONS and word not in wmap[key]:
+                wmap[key].append(word)
+
+    proc_words_func(path, bads, MAX_COUNT, insert_word)
     return {k: wmap[k] for k in sorted(wmap)}
+
+def list_words(path, bads=set()):
+    words = OrderedDict()
+
+    def add(word):
+        word = word[:MAX_LENGTH]
+        if ' ' in word:
+            return False
+        while not word[-1].isalpha():
+            word = word[:-1]
+        if word and word not in words:
+            words[word] = None
+            return True
+        return False
+
+    proc_words_func(path, bads, MAX_COUNT, add)
+    return [k for k in sorted(words)]
 
 def save_json(obj, path):
     with io.open(path, 'wt') as f:
@@ -84,8 +105,14 @@ def save_js(obj, path):
         f.write(data)
         f.write(';\n')
 
+def save_text(obj, path):
+    with io.open(path, 'wt') as f:
+        for w in obj:
+            print(w, file=f)
+
 if __name__ == '__main__':
-    save_json(proc_words('source_data/all.num.o5', 'source_data/bad-words2.txt'), 'words.json')
+    # save_json(type_suggestion_dict('source_data/all.num.o5', load_bads('source_data/bad-words2.txt')), 'words.json')
+    save_text(list_words('source_data/all.num.o5', load_bads('source_data/bad-words2.txt')), 'all_words.txt')
     
     # Word frequency database 'all.num.o5' can be downloaded from
     # https://www.kilgarriff.co.uk/bnc-readme.html
